@@ -1,6 +1,7 @@
 class Knight {
   constructor() {}
 }
+
 class ChessBoard {
   constructor() {
     this.board = this.buildChessBoard();
@@ -34,7 +35,6 @@ class ChessBoard {
     });
   }
   legalMoves(y, x) {
-    console.log(`Current Knight Position ${y} ${x}`);
     // this.move(y, x);
     const moves = [];
     const directions = [
@@ -63,78 +63,23 @@ class ChessBoard {
     return moves;
   }
   KnightMoves([startY, startX], [endY, endX]) {
-    this.destinationFinder([startY, startX], [endY, endX]);
-    // send current location start and for location is end
-    // destinationFinder will be the one given shortest path
-    // move method will be the one to go
+    if (this.coordValidChecker(startY, startX) && this.coordValidChecker(endY, endX)) {
+      const moves = this.destinationFinder([startY, startX], [endY, endX]);
+      console.log(`You made it in ${moves.length - 1} moves Here's you path: `);
+      console.log(moves);
+    } else {
+      console.log("Invalid Move");
+      return;
+    }
   }
-  // destinationFinder([startY, startX], [endY, endX]) {
-  //   //before finding the shortest solution i should put all the possible route to go that distination
-  //   // only put queue if the edge is not on the visited yet
 
-  //   // Task convert the edge into some string and put all on the queue
-  //   // const edges = this.legalMoves(startY, startX);
-  //   const visited = new Set();
-  //   const queue = [];
-  //   const parentMap = new Map();
-
-  //   const targetDestination = [endY, endX].join(",");
-  //   const startCoordStr = [startY, startX].join(",");
-
-  //   let current = targetDestination;
-  //   let path = [targetDestination];
-  //   console.log("This is Path", path);
-
-  //   edges.forEach((coord) => {
-  //     const coordStr = this.stringifyCoord(coord);
-  //     queue.push(coordStr);
-  //     visited.add(coordStr);
-  //   });
-
-  //   while (queue.length > 0) {
-  //     const currentCoord = queue.shift();
-
-  //     if (currentCoord === targetDestination) {
-  //       console.log("Target found at", currentCoord);
-  //       return;
-  //     }
-
-  //     const queuedCoord = this.parseCoord(currentCoord); // For Converting String to Number to use as arguements
-  //     const neighbors = this.legalMoves(queuedCoord[0], queuedCoord[1]);
-
-  //     neighbors.forEach((coord) => {
-  //       const coordStr = this.stringifyCoord(coord);
-
-  //       if (!visited.has(coordStr)) {
-  //         queue.push(coordStr);
-  //         visited.add(coordStr);
-  //         parentMap.set(coordStr, queuedCoord);
-  //         console.log("This is parentMap inside");
-  //         console.log(parentMap);
-  //         console.log(coordStr);
-
-  //         const [newy, newx] = this.parseCoord(coordStr);
-
-  //         console.log("--------------------");
-  //         this.move(newy, newx);
-  //       }
-  //     });
-  //   }
-
-  //   while (current !== targetDestination) {
-  //     current = parentMap.get(current);
-  //     current = parent.join(",");
-  //     path.unshift(current);
-  //   }
-
-  //   console.warn("Target not reachable");
-  // }
   destinationFinder([startY, startX], [endY, endX]) {
     //before finding the shortest solution i should put all the possible route to go that distination
     // only put queue if the edge is not on the visited yet
 
     // Task convert the edge into some string and put all on the queue
     // const edges = this.legalMoves(startY, startX);
+
     const visited = new Set();
     const queue = [];
     const parentMap = new Map();
@@ -150,7 +95,6 @@ class ChessBoard {
     while (queue.length > 0) {
       const currentCoord = queue.shift();
 
-      console.log(`This is the currentCoor and target coord: ${currentCoord} , ${targetCoordStr}`);
       if (currentCoord === targetCoordStr) {
         found = true;
 
@@ -179,7 +123,7 @@ class ChessBoard {
       return;
     }
     // For Constructing the shortest path
-    console.log(parentMap);
+
     let current = targetCoordStr;
     let path = [];
 
@@ -190,7 +134,6 @@ class ChessBoard {
     path.unshift(startCoordStr);
 
     return path;
-    console.log("Shortest Path:", path);
   }
 
   //helper method
@@ -202,9 +145,86 @@ class ChessBoard {
   stringifyCoord(coordArr) {
     return coordArr.join(",");
   }
+  coordValidChecker(y, x) {
+    if (y >= 0 && y < 8 && x >= 0 && x < 8) {
+      return true;
+    }
+  }
 }
-const chess = new ChessBoard();
+class Tile {
+  static count = 0;
 
-chess.move(1, 8);
-chess.board;
-chess.KnightMoves([3, 1], [6, 6]);
+  constructor(y, x) {
+    this.x = x;
+    this.y = y;
+    this.element = document.createElement("div");
+
+    this.element.classList.add("chessboard__tile");
+    // const isDark = (x + y) % 2 !== 0;
+    this.isDark = (x + y) % 2 !== 0;
+    this.element.classList.add(this.isDark ? "chessboard__tile--dark" : "chessboard__tile--light");
+
+    this.element.dataset.coord = `${y},${x}`;
+
+    // I want to add a number and letters in the tile
+    // if the tile is y is 0 add numbers
+    // if the tile is x is 7 add letters
+    if (y === 0 || x === 7) {
+      this.addLabel();
+    }
+  }
+  addLabel() {
+    const labelWrapper = document.createElement("div");
+    // labelWrapper.classList.add("tile__label-wrapper");
+
+    if (this.y === 0) {
+      const numberLabel = document.createElement("span");
+
+      numberLabel.classList.add("tile__label", "tile__label--top");
+      numberLabel.classList.add(!this.isDark ? "tile__label--top--dark" : "tile__label--top--light");
+      numberLabel.textContent = 8 - this.x;
+      labelWrapper.appendChild(numberLabel);
+    }
+    if (this.x === 7) {
+      const letterLabel = document.createElement("span");
+      letterLabel.classList.add("tile__label", "tile__label--down");
+      letterLabel.classList.add(!this.isDark ? "tile__label--down--dark" : "tile__label--down--light");
+
+      const letter = ["a", "b", "c", "d", "e", "f", "g", "h"];
+
+      letterLabel.textContent = letter[this.y];
+      labelWrapper.appendChild(letterLabel);
+    }
+
+    this.element.appendChild(labelWrapper);
+  }
+  render() {
+    return this.element;
+  }
+}
+
+const knightImgPath = "LightKnight.webp";
+
+function initializeBoardUi() {
+  const boardUi = document.querySelector(".chessboard");
+  for (let y = 0; y < 8; y++) {
+    for (let x = 0; x < 8; x++) {
+      const tile = new Tile(x, y);
+      boardUi.appendChild(tile.render());
+    }
+  }
+}
+function renderKnightMove(y, x) {
+  const img = document.createElement("img");
+  img.src = knightImgPath;
+  img.alt = "Knight";
+  img.classList.add("knight");
+
+  const tile = document.querySelector(`[data-coord="${y},${x}"]`);
+  tile.appendChild(img);
+}
+
+const chess = new ChessBoard();
+initializeBoardUi();
+renderKnightMove(0, 7);
+console.log();
