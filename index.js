@@ -18,13 +18,14 @@ class ChessBoard {
 
     return board;
   }
+
   move(x, y) {
     if (x > 7 || y > 7) {
       console.log("Invalid Move");
       return;
     }
-    this.board[x][y] = `[K]`;
 
+    this.board[x][y] = `[K]`;
     this.print(this.board);
   }
   print(arr) {
@@ -33,62 +34,96 @@ class ChessBoard {
     });
   }
   legalMoves(y, x) {
-    //current move [4,3] = [5,5]
-    // lets make constrains
-    // right path
     console.log(`Current Knight Position ${y} ${x}`);
-    this.move(y, x);
+    // this.move(y, x);
     const moves = [];
+    const directions = [
+      [2, 1],
+      [1, 2],
+      [-1, 2],
+      [-2, 1],
+      [-2, -1],
+      [-1, -2],
+      [1, -2],
+      [2, -1],
+    ];
 
-    // this.board[x + 2][y + 1];
-    // this.board[x + 2][y - 1];
-
-    // // down path
-    // this.board[x + 1][y + 2];
-    // this.board[x - 1][y + 2];
-
-    // // left path
-    // this.board[x - 2][y + 1];
-    // this.board[x - 2][y - 1];
-
-    if (x > 1 && y > 1 && x < 6 && y < 6) {
-      console.log("Probably center");
-      // this.board[x - 2][y + 1];
-      // this.board[x - 2][y - 1];
-      //left
-      moves.push([y - 2, x + 1], [y - 2, x - 1]);
-      //right path
-      moves.push([y + 2, x + 1], [y + 2, x - 1]);
-      //up path
-      // moves.push([y + 1, x - 2], [y - 1, x - 2]);
-      moves.push([y - 2, x + 1], [y - 2, x - 1]);
-      //down path
-      moves.push([y + 1, x + 2], [y - 1, x + 2]);
+    for (const [dy, dx] of directions) {
+      const newY = y + dy;
+      const newX = x + dx;
+      if (newY >= 0 && newY < 8 && newX >= 0 && newX < 8) {
+        moves.push([newY, newX]);
+      }
     }
-    // for 0 -> 1
-    if (x >= 1 && y >= 1) {
-      //down path
-      //[2,3]
-      moves.push([y + 1, x + 2], [y - 1, x + 2]);
-      moves.push([y + 2, x + 1], [y + 2, x - 1]);
-      moves.push([y - 2, x + 1], [y - 2, x - 1]);
-    } else if (x >= 0 && y >= 1) console.log(moves);
-    for (const [y, x] of moves) {
-      console.log(y, x);
-      this.move(y, x);
-    }
-    // return moves;
-
-    // if (x < 0) {
+    // console.log(moves);
+    // for (const [y, x] of moves) {
+    //   this.move(y, x);
+    //   // this.print(this.board);
     // }
-    // // up path
-    // this.board[x + 2][y - 1];
-    // this.board[x - 2][y - 1];
+    return moves;
+  }
+  KnightMoves([startY, startX], [endY, endX]) {
+    this.destinationFinder([startY, startX], [endY, endX]);
+    // send current location start and for location is end
+    // destinationFinder will be the one given shortest path
+    // move method will be the one to go
+  }
+  destinationFinder([startY, startX], [endY, endX]) {
+    //before finding the shortest solution i should put all the possible route to go that distination
+    // only put queue if the edge is not on the visited yet
+
+    // Task convert the edge into some string and put all on the queue
+    const edges = this.legalMoves(startY, startX);
+    const visited = new Set();
+    const queue = [];
+
+    const targetDestination = [endY, endX].join(",");
+    let found = false;
+
+    edges.forEach((coord) => {
+      const coordStr = this.stringifyCoord(coord);
+      queue.push(coordStr);
+      visited.add(coordStr);
+    });
+
+    while (found !== true) {
+      const current = queue.shift();
+      if (current === targetDestination) {
+        found = true;
+        console.log("found");
+        return;
+      }
+
+      const [x, y] = this.parseCoord(current);
+      const nextMoves = this.legalMoves(x, y);
+      nextMoves.forEach((coord) => {
+        const coordStr = this.stringifyCoord(coord);
+
+        if (!visited.has(coordStr)) {
+          queue.push(coordStr);
+          visited.add(coordStr);
+          console.log(coordStr);
+
+          const [newy, newx] = this.parseCoord(coordStr);
+
+          console.log("--------------------");
+          this.move(newy, newx);
+        }
+        console.log(queue);
+      });
+    }
+  }
+  //helper method
+  parseCoord(coordStr) {
+    return coordStr.split(",").map(Number);
+  }
+
+  stringifyCoord(coordArr) {
+    return coordArr.join(",");
   }
 }
-
 const chess = new ChessBoard();
 
 chess.move(1, 8);
 chess.board;
-chess.legalMoves(3, 1);
+chess.KnightMoves([5, 4], [6, 6]);
