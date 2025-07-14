@@ -68,52 +68,133 @@ class ChessBoard {
     // destinationFinder will be the one given shortest path
     // move method will be the one to go
   }
+  // destinationFinder([startY, startX], [endY, endX]) {
+  //   //before finding the shortest solution i should put all the possible route to go that distination
+  //   // only put queue if the edge is not on the visited yet
+
+  //   // Task convert the edge into some string and put all on the queue
+  //   // const edges = this.legalMoves(startY, startX);
+  //   const visited = new Set();
+  //   const queue = [];
+  //   const parentMap = new Map();
+
+  //   const targetDestination = [endY, endX].join(",");
+  //   const startCoordStr = [startY, startX].join(",");
+
+  //   let current = targetDestination;
+  //   let path = [targetDestination];
+  //   console.log("This is Path", path);
+
+  //   edges.forEach((coord) => {
+  //     const coordStr = this.stringifyCoord(coord);
+  //     queue.push(coordStr);
+  //     visited.add(coordStr);
+  //   });
+
+  //   while (queue.length > 0) {
+  //     const currentCoord = queue.shift();
+
+  //     if (currentCoord === targetDestination) {
+  //       console.log("Target found at", currentCoord);
+  //       return;
+  //     }
+
+  //     const queuedCoord = this.parseCoord(currentCoord); // For Converting String to Number to use as arguements
+  //     const neighbors = this.legalMoves(queuedCoord[0], queuedCoord[1]);
+
+  //     neighbors.forEach((coord) => {
+  //       const coordStr = this.stringifyCoord(coord);
+
+  //       if (!visited.has(coordStr)) {
+  //         queue.push(coordStr);
+  //         visited.add(coordStr);
+  //         parentMap.set(coordStr, queuedCoord);
+  //         console.log("This is parentMap inside");
+  //         console.log(parentMap);
+  //         console.log(coordStr);
+
+  //         const [newy, newx] = this.parseCoord(coordStr);
+
+  //         console.log("--------------------");
+  //         this.move(newy, newx);
+  //       }
+  //     });
+  //   }
+
+  //   while (current !== targetDestination) {
+  //     current = parentMap.get(current);
+  //     current = parent.join(",");
+  //     path.unshift(current);
+  //   }
+
+  //   console.warn("Target not reachable");
+  // }
   destinationFinder([startY, startX], [endY, endX]) {
     //before finding the shortest solution i should put all the possible route to go that distination
     // only put queue if the edge is not on the visited yet
 
     // Task convert the edge into some string and put all on the queue
-    const edges = this.legalMoves(startY, startX);
+    // const edges = this.legalMoves(startY, startX);
     const visited = new Set();
     const queue = [];
+    const parentMap = new Map();
 
-    const targetDestination = [endY, endX].join(",");
+    const targetCoordStr = [endY, endX].join(",");
+    const startCoordStr = [startY, startX].join(",");
+
+    queue.push(startCoordStr);
+    visited.add(startCoordStr);
+
     let found = false;
 
-    edges.forEach((coord) => {
-      const coordStr = this.stringifyCoord(coord);
-      queue.push(coordStr);
-      visited.add(coordStr);
-    });
+    while (queue.length > 0) {
+      const currentCoord = queue.shift();
 
-    while (found !== true) {
-      const current = queue.shift();
-      if (current === targetDestination) {
+      console.log(`This is the currentCoor and target coord: ${currentCoord} , ${targetCoordStr}`);
+      if (currentCoord === targetCoordStr) {
         found = true;
-        console.log("found");
-        return;
+
+        console.log("Target found at", currentCoord);
+        break;
       }
 
-      const [x, y] = this.parseCoord(current);
-      const nextMoves = this.legalMoves(x, y);
-      nextMoves.forEach((coord) => {
+      const queuedCoord = this.parseCoord(currentCoord);
+      const neighbors = this.legalMoves(queuedCoord[0], queuedCoord[1]);
+
+      neighbors.forEach((coord) => {
         const coordStr = this.stringifyCoord(coord);
 
         if (!visited.has(coordStr)) {
-          queue.push(coordStr);
           visited.add(coordStr);
-          console.log(coordStr);
+          queue.push(coordStr);
+          parentMap.set(coordStr, currentCoord);
 
-          const [newy, newx] = this.parseCoord(coordStr);
-
-          console.log("--------------------");
-          this.move(newy, newx);
+          // this.move(newy, newx);
         }
-        console.log(queue);
       });
     }
+
+    if (!found) {
+      console.warn("Target not reachable");
+      return;
+    }
+    // For Constructing the shortest path
+    console.log(parentMap);
+    let current = targetCoordStr;
+    let path = [];
+
+    while (current !== startCoordStr) {
+      path.unshift(current);
+      current = parentMap.get(current);
+    }
+    path.unshift(startCoordStr);
+
+    return path;
+    console.log("Shortest Path:", path);
   }
+
   //helper method
+
   parseCoord(coordStr) {
     return coordStr.split(",").map(Number);
   }
@@ -126,4 +207,4 @@ const chess = new ChessBoard();
 
 chess.move(1, 8);
 chess.board;
-chess.KnightMoves([5, 4], [6, 6]);
+chess.KnightMoves([3, 1], [6, 6]);
