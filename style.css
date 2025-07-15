@@ -189,6 +189,21 @@ dialog::backdrop {
   border-radius: 1rem;
   max-width: 300px;
 }
+footer {
+  color: #eeeed2;
+}
+a:link {
+  color: #a2d060;
+}
+a:visited {
+  color: a2d060;
+}
+a:hover {
+  color: eeeed2;
+}
+a:active {
+  color: red;
+}
 @media (max-width: 768px) {
   main {
     grid-template-columns: 1fr; /* Stack vertically on small screens */
