@@ -7,7 +7,7 @@
 ## 🔗 Live Demo
 
 🌐 **[Click here to view the demo](https://knighttravails.netlify.app/)**  
-📸 ![Knight Travails Demo](https://your-demo-gif-link.com/demo.gif)
+📸 ![Knight Travails Demo](KnightTravails.gif)
 
 > ⚠️ _Best viewed on desktop for full visualization._
 
