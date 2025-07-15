@@ -9,13 +9,35 @@
   <body>
     <main>
       <section class="controls">
-        <!--For Placing Knights, Random Knights Placmenet-->
-        
+        <div class="controls__card">
+          <div class="site-title-wrapper">
+            <h1 class="site-title">♞ Knight Travails</h1>
+          </div>
+
+          <div class="buttons-wrapper">
+            <button title="Place Knight at a Random Position" id="randomKnightPlacement">♞ Random</button>
+            <button title="Place Knight at a Specific Location" id="specificKnightPlacement">♞ Place Knight</button>
+          </div>
+          <div class="moves__card">
+            <div class="moves-wrapper">
+              <div class="avatar-container">
+                <img src="avatar.png" class="avatar" />
+              </div>
+              <p class="message" id="message-bubble">You started at e4 and reached h1 in 3 moves: f2 → g4 → h1.</p>
+            </div>
+          </div>
+        </div>
       </section>
       <section class="chessboard">
         <!--Chessboard-->
       </section>
     </main>
+    <dialog id="knightDialog">
+      <h2>Info</h2>
+      <p>Choose Square For It's <span id="message"></span></p>
+      <button id="closeDialogBtn">Close</button>
+    </dialog>
+
     <script src="index.js"></script>
   </body>
 </html>

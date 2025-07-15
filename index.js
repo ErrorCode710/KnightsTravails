@@ -67,6 +67,7 @@ class ChessBoard {
       const moves = this.destinationFinder([startY, startX], [endY, endX]);
       console.log(`You made it in ${moves.length - 1} moves Here's you path: `);
       console.log(moves);
+      return moves;
     } else {
       console.log("Invalid Move");
       return;
@@ -128,10 +129,11 @@ class ChessBoard {
     let path = [];
 
     while (current !== startCoordStr) {
-      path.unshift(current);
+      path.unshift(this.parseCoord(current));
       current = parentMap.get(current);
     }
-    path.unshift(startCoordStr);
+    path.unshift(this.parseCoord(current));
+    console.log(path);
 
     return path;
   }
@@ -215,16 +217,192 @@ function initializeBoardUi() {
   }
 }
 function renderKnightMove(y, x) {
+  clearExistingKnight();
   const img = document.createElement("img");
   img.src = knightImgPath;
   img.alt = "Knight";
   img.classList.add("knight");
 
   const tile = document.querySelector(`[data-coord="${y},${x}"]`);
+  console.log(tile);
+
   tile.appendChild(img);
+}
+function clearExistingKnight() {
+  const knight = document.querySelector(".knight");
+  if (knight) knight.remove();
+}
+
+function showInfoModal(message) {
+  const dialog = document.getElementById("knightDialog");
+  const span = document.getElementById("message");
+  span.textContent = message;
+
+  dialog.showModal();
+}
+function closeInfoModal() {
+  const dialog = document.getElementById("knightDialog");
+  const closeBtn = document.getElementById("closeDialogBtn");
+  closeBtn.addEventListener("click", () => {
+    console.log("Clicked Close");
+    dialog.close();
+  });
+}
+function selectDestination(callback) {
+  console.log("Running");
+  const board = document.querySelector(".chessboard");
+
+  board.addEventListener("click", function handleClick(e) {
+    const tile = e.target.closest(".chessboard__tile");
+    if (!tile || !board.contains(tile)) return;
+
+    board.removeEventListener("click", handleClick);
+
+    const coord = tile.dataset.coord;
+    document.querySelector(".highlight")?.classList.remove("highlight");
+    tile.classList.add("highlight");
+
+    callback(coord);
+  });
+}
+function selectStartingPosition(callback) {
+  const board = document.querySelector(".chessboard");
+
+  board.addEventListener("click", function handleClick(e) {
+    const tile = e.target.closest(".chessboard__tile");
+    if (!tile || !board.contains(tile)) return;
+
+    board.removeEventListener("click", handleClick);
+
+    const coord = tile.dataset.coord;
+
+    callback(coord);
+  });
+}
+function randomKnightPlacement() {
+  const btn = document.getElementById("randomKnightPlacement");
+
+  btn.addEventListener("click", () => {
+    const startX = Math.floor(Math.random() * 8);
+    const startY = Math.floor(Math.random() * 8);
+
+    let currentX = startX;
+    let currentY = startY;
+
+    renderKnightMove(currentY, currentX);
+    showInfoModal("Target Destination");
+    closeInfoModal();
+
+    const board = new ChessBoard();
+
+    function playNextMove() {
+      selectDestination((coord) => {
+        const targetCoord = board.parseCoord(coord);
+        const moves = board.KnightMoves([currentY, currentX], [targetCoord[0], targetCoord[1]]);
+        messageGenerator(moves);
+        console.log("Moves to destination:", moves);
+
+        let index = 0;
+
+        const interval = setInterval(() => {
+          if (index >= moves.length) {
+            clearInterval(interval);
+            // Update current position to last move
+            const [newY, newX] = targetCoord;
+            currentY = newY;
+            currentX = newX;
+
+            // Recursively allow the next move
+            playNextMove();
+            return;
+          }
+
+          const [y, x] = moves[index];
+          renderKnightMove(y, x);
+          index++;
+        }, 500);
+      });
+    }
+
+    playNextMove(); // start the recursive "game loop"
+  });
+}
+function specificKnightPlacement() {
+  const btn = document.getElementById("specificKnightPlacement");
+
+  btn.addEventListener("click", () => {
+    clearExistingKnight();
+
+    showInfoModal("Starting Position");
+    closeInfoModal();
+
+    const board = new ChessBoard();
+
+    selectStartingPosition((coord) => {
+      const startCoordStr = board.parseCoord(coord);
+      let [startY, startX] = startCoordStr;
+
+      renderKnightMove(startY, startX);
+      showInfoModal("Target Destination");
+      closeInfoModal();
+
+      function playNextMove() {
+        selectDestination((coord) => {
+          const targetCoord = board.parseCoord(coord);
+          const moves = board.KnightMoves([startY, startX], [targetCoord[0], targetCoord[1]]);
+          messageGenerator(moves);
+          console.log("Moves to destination:", moves);
+
+          let index = 0;
+
+          const interval = setInterval(() => {
+            if (index >= moves.length) {
+              clearInterval(interval);
+
+              const [newY, newX] = targetCoord;
+              startY = newY;
+              startX = newX;
+
+              // Recursively allow the next move
+              playNextMove();
+              return;
+            }
+
+            const [y, x] = moves[index];
+            renderKnightMove(y, x);
+            index++;
+          }, 500);
+        });
+      }
+      playNextMove();
+    });
+  });
+}
+function toChessCoord([x, y]) {
+  const cols = "abcdefgh";
+  console.log(x, y);
+  return `${cols[x]}${8 - y}`;
+}
+
+function messageGenerator(moves) {
+  if (!moves.length) return "No moves available.";
+
+  const formattedMoves = moves.map(toChessCoord); // Convert all to chess notation
+  const start = formattedMoves[0];
+  const end = formattedMoves[formattedMoves.length - 1];
+  const moveCount = formattedMoves.length - 1;
+
+  const pathStr = formattedMoves.join(" → ");
+  console.log(pathStr);
+  const messageForm = document.getElementById("message-bubble");
+  messageForm.textContent = `You started at ${start} and reached ${end} in ${moveCount} move${
+    moveCount > 1 ? "s" : ""
+  }: ${pathStr}`;
 }
 
 const chess = new ChessBoard();
 initializeBoardUi();
-renderKnightMove(0, 7);
+randomKnightPlacement();
+specificKnightPlacement();
+// renderKnightMove(0, 7);
 console.log();
